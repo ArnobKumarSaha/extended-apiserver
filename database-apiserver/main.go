@@ -44,7 +44,7 @@ func generateCertificates(fs afero.Fs)  *certstore.CertStore{
 	}
 
 	clientCert, clientKey, err := store.NewClientCertPair(cert.AltNames{
-		DNSNames: []string{"jane"},
+		DNSNames: []string{"janejane"},
 	})
 	if err != nil {
 		log.Fatalln(err)
@@ -114,7 +114,13 @@ func main() {
 
 		user := "system:anonymous"
 		src := "-"
+		fmt.Println("TLS.PeerCertificate length is ", len(r.TLS.PeerCertificates))
+
 		if len(r.TLS.PeerCertificates) > 0 { // client TLS was used
+			/*fmt.Println("clnt : ", r.TLS.PeerCertificates[0].Subject.CommonName)
+			if len(r.TLS.PeerCertificates) == 2 {
+				fmt.Println(r.TLS.PeerCertificates[1].Subject.CommonName)
+			}*/
 			opts := x509.VerifyOptions{
 				Roots:     rhCACertPool,
 				KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
