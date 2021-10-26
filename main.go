@@ -36,7 +36,6 @@ func makeCertificates(fs afero.Fs) *certstore.CertStore {
 	// server-side setup
 	serverCert, serverKey, err := store.NewServerCertPair(cert.AltNames{
 		IPs: []net.IP{net.ParseIP("127.0.0.1")},
-		DNSNames: []string{"something.com"},
 	})
 	if err != nil {
 		log.Fatalln(err)
@@ -48,7 +47,7 @@ func makeCertificates(fs afero.Fs) *certstore.CertStore {
 
 	// client-side setup
 	clientCert, clientKey, err := store.NewClientCertPair(cert.AltNames{
-		DNSNames: []string{"arnob"},
+		DNSNames: []string{"arnobkumarsaha"},
 	})
 	if err != nil {
 		log.Fatalln(err)
@@ -74,7 +73,7 @@ func getTLSCertificateOfNewCA(fs afero.Fs) tls.Certificate{
 	// Client-side setup
 	rhClientCert, rhClientKey, err := rhStore.NewClientCertPair(cert.AltNames{
 		// because apiserver is making the calls to database eas(extended-api-server), apiserver itself is the client
-		DNSNames: []string{"apiserver"},
+		DNSNames: []string{"requestheaderapiserver"},
 	})
 	if err != nil {
 		log.Fatalln(err)
