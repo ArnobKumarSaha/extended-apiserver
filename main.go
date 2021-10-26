@@ -14,7 +14,7 @@ import (
 )
 
 func okHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "OK")
+	fmt.Fprintln(w, "OK from APIserver")
 }
 
 func makeCertificates() *certstore.CertStore {
@@ -32,6 +32,7 @@ func makeCertificates() *certstore.CertStore {
 	// server-side setup
 	serverCert, serverKey, err := store.NewServerCertPair(cert.AltNames{
 		IPs: []net.IP{net.ParseIP("127.0.0.1")},
+		DNSNames: []string{"something.com"},
 	})
 	if err != nil {
 		log.Fatalln(err)

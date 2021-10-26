@@ -160,50 +160,6 @@ func (s *CertStore) KeyFile(name string) string {
 }
 
 
-
-
-
-
-
-
-
-
-
-func (s *CertStore) Write(name string, crt *x509.Certificate, key *rsa.PrivateKey) error {
-	// certutil.EncodeCertPEM converts the certificate into Byte slice
-	// then afero.WriteFile() actually write these Bytes into specific file location
-	if err := afero.WriteFile(s.fs, s.CertFile(name), certutil.EncodeCertPEM(crt), 0644); err != nil {
-		return errors.Wrapf(err, "failed to write `%s`", s.CertFile(name))
-	}
-	if err := afero.WriteFile(s.fs, s.KeyFile(name), certutil.EncodePrivateKeyPEM(key), 0600); err != nil {
-		return errors.Wrapf(err, "failed to write `%s`", s.KeyFile(name))
-	}
-	return nil
-}
-
-func (s *CertStore) Read(name string) (*x509.Certificate, *rsa.PrivateKey, error) {
-	// Reading the certificate
-	crtBytes, err := afero.ReadFile(s.fs, s.CertFile(name))
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to read certificate `%s`", s.CertFile(name))
-	}
-	crt, err := certutil.ParseCertsPEM(crtBytes)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to parse certificate `%s`", s.CertFile(name))
-	}
-
-	// Reading the Private key
-	keyBytes, err := afero.ReadFile(s.fs, s.KeyFile(name))
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to read private key `%s`", s.KeyFile(name))
-	}
-	key, err := certutil.ParsePrivateKeyPEM(keyBytes)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to parse private key `%s`", s.KeyFile(name))
-	}
-	return crt[0], key.(*rsa.PrivateKey), nil
-}
-
 // If DNS is given , that will be the common name, otherwise the ip will be the common name
 func getCN(sans certutil.AltNames) string {
 	if len(sans.DNSNames) > 0 {
@@ -223,13 +179,6 @@ func getCN(sans certutil.AltNames) string {
 // *********************************************************************************************
 
 /*
-func (s *CertStore) InitCA(prefix ...string) error {
-	err := s.LoadCA(prefix...)
-	if err == nil {
-		return nil
-	}
-	return s.NewCA(prefix...)
-}
 func (s *CertStore) SetCA(crtBytes, keyBytes []byte) error {
 	crt, err := cert.ParseCertsPEM(crtBytes)
 	if err != nil {
@@ -246,37 +195,6 @@ func (s *CertStore) SetCA(crtBytes, keyBytes []byte) error {
 	return s.Write(s.ca, s.caCert, s.caKey)
 }
 
-func (s *CertStore) LoadCA(prefix ...string) error {
-	if err := s.prep(prefix...); err != nil {
-		return err
-	}
-
-	if s.PairExists(s.ca, prefix...) {
-		var err error
-		s.caCert, s.caKey, err = s.Read(s.ca)
-		return err
-	}
-
-	// only ca key found, extract ca cert from it.
-	if _, err := s.fs.Stat(s.KeyFile(s.ca)); err == nil {
-		keyBytes, err := afero.ReadFile(s.fs, s.KeyFile(s.ca))
-		if err != nil {
-			return errors.Wrapf(err, "failed to read private key `%s`", s.KeyFile(s.ca))
-		}
-		key, err := cert.ParsePrivateKeyPEM(keyBytes)
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse private key `%s`", s.KeyFile(s.ca))
-		}
-		rsaKey, ok := key.(*rsa.PrivateKey)
-		if !ok {
-			return errors.Errorf("private key `%s` is not a rsa private key", s.KeyFile(s.ca))
-		}
-		return s.createCAFromKey(rsaKey)
-	}
-
-	return os.ErrNotExist
-}
-
 
 func (s *CertStore) Location() string {
 	return s.dir
@@ -288,10 +206,6 @@ func (s *CertStore) CAName() string {
 
 func (s *CertStore) CACert() *x509.Certificate {
 	return s.caCert
-}
-
-func (s *CertStore) CACertBytes() []byte {
-	return cert.EncodeCertPEM(s.caCert)
 }
 
 func (s *CertStore) CAKey() *rsa.PrivateKey {
@@ -315,16 +229,4 @@ func (s *CertStore) IsExists(name string, prefix ...string) bool {
 	return false
 }
 
-func (s *CertStore) PairExists(name string, prefix ...string) bool {
-	if err := s.prep(prefix...); err != nil {
-		panic(err)
-	}
-
-	if _, err := s.fs.Stat(s.CertFile(name)); err == nil {
-		if _, err := s.fs.Stat(s.KeyFile(name)); err == nil {
-			return true
-		}
-	}
-	return false
-}
 */
