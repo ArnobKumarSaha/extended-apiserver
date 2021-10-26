@@ -64,7 +64,7 @@ func (s *CertStore) PairExists(name string, prefix ...string) bool {
 	return false
 }
 
-/*
+// Get PEM-encoded CA certificate
 func (s *CertStore) CACertBytes() []byte {
 	return cert.EncodeCertPEM(s.caCert)
-}*/
+}

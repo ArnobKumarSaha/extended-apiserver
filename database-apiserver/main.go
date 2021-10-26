@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/x509"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -55,17 +57,17 @@ func generateCertificates(fs afero.Fs)  *certstore.CertStore{
 }
 
 func main() {
-	/*
+
 	var proxy = false
 	flag.BoolVar(&proxy, "receive-proxy-request", proxy, "receive forwarded requests from apiserver")
 	flag.Parse()
-	*/
+
 
 	fs := afero.NewOsFs()
 	store := generateCertificates(fs)
-/*
-	// -----------------------------------------------------------------------------
-	apiserverStore, err := certstore.NewCertStore(fs, "/tmp/DIY-k8s-extended-apiserver")
+
+	// -----------------------------Load apiserver's CA cert & key------------------------------------------------
+	apiserverStore, err := certstore.NewCertStore(fs, "/tmp/k8s-extended-apiserver")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -76,9 +78,9 @@ func main() {
 		}
 	}
 
-	// -----------------------------------------------------------------------------
+	// --------------------------List PEM-encoded certs , which will be received by it--------------------------------------------------
 	rhCACertPool := x509.NewCertPool()
-	rhStore, err := certstore.NewCertStore(fs, "/tmp/DIY-k8s-extended-apiserver")
+	rhStore, err := certstore.NewCertStore(fs, "/tmp/k8s-extended-apiserver")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -90,7 +92,7 @@ func main() {
 		rhCACertPool.AppendCertsFromPEM(rhStore.CACertBytes())
 	}
 	// -----------------------------------------------------------------------------
-*/
+
 	cfg := server.Config{
 		Address: "127.0.0.2:8443",
 		CACertFiles: []string{
@@ -100,16 +102,16 @@ func main() {
 		CertFile: store.CertFile("tls"),
 		KeyFile:  store.KeyFile("tls"),
 	}
-	/*
+
 	if proxy {
 		cfg.CACertFiles = append(cfg.CACertFiles, apiserverStore.CertFile("ca"))
 		cfg.CACertFiles = append(cfg.CACertFiles, rhStore.CertFile("ca"))
-	}*/
+	}
 	srv := server.NewGenericServer(cfg)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/database/{resource}", func(w http.ResponseWriter, r *http.Request) {
-		/*
+
 		user := "system:anonymous"
 		src := "-"
 		if len(r.TLS.PeerCertificates) > 0 { // client TLS was used
@@ -125,11 +127,11 @@ func main() {
 				src = "X-Remote-User"
 			}
 		}
-		*/
+
 		vars := mux.Vars(r)
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Resource: %v\n", vars["resource"])
-		//fmt.Fprintf(w, "Resource: %v requested by user[%s]=%s\n", vars["resource"], src, user)
+		//fmt.Fprintf(w, "Resource: %v\n", vars["resource"])
+		fmt.Fprintf(w, "Resource: %v requested by user[%s]=%s\n", vars["resource"], src, user)
 	})
 	r.HandleFunc("/", handler)
 	srv.ListenAndServe(r)
